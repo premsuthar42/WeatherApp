@@ -40,7 +40,7 @@ const styles = StyleSheet.create({
         color: color.primary,
         flex: 0.5,
         textAlign: 'right',
-        paddingRight: 2
+        paddingRight: 2.2
     },
 })
 
