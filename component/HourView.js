@@ -20,7 +20,7 @@ const styles = StyleSheet.create({
     screen: {
         alignItems: 'center',
         marginRight: 16,
-        // paddingLeft: 7
+        marginLeft: 2
     },
     topText: {
         marginTop: 4,

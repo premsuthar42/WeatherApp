@@ -7,6 +7,7 @@ import  axios  from 'axios'
 import { Searchbar } from 'react-native-paper'
 import CustomButton from '../../component/CustomButton'
 import moment from 'moment'
+import Geolocation from '@react-native-community/geolocation'
 
 
 const HomeScreen = () => {
@@ -14,26 +15,44 @@ const HomeScreen = () => {
     const [newData, setNewData] = useState([])
     const [searchQuery, setSearchQuery] = useState('');
     const [check, setCheck] = useState(true)
-    const [text, setText] = useState()
     const [hideList, setHideList] = useState(false)
     const [arr, setArr] = useState([])
+    const [lat, setLat] = useState()
+    const [long, setLong] = useState()
 
-    const onChangeSearch = query => setSearchQuery(query);
-    
+    const onChangeSearch = (query) => {
+        setSearchQuery(query)
+    };
+
     useEffect(() => {
-        axios.get(`http://api.weatherapi.com/v1/search.json?key=6db1beadfe5c4df3b1861303220306&q=${!text ? searchQuery : text }`)
+        axios.get(`https://api.weatherapi.com/v1/forecast.json?key=6db1beadfe5c4df3b1861303220306&q=jaipur&days=3&aqi=yes&alerts=yes
+        `)
+        .then(res => {
+            setNewData(res.data);
+            setCheck(true)
+            const newArr = res?.data?.forecast?.forecastday[0]?.hour?.filter((item)=> moment(item.time).format() >= moment().format())
+            setArr(newArr)
+        }).catch(error =>{
+            console.warn("error :", error)
+        })
+    }, [])
+    
+
+    const longLat = () => {
+        arr = newData?.forecast?.forecastday[1]?.hour?.filter((item)=> moment(item.time).format <= moment(item.time).format)
+        // Geolocation.getCurrentPosition(info=> setLat(info.coords.latitude))
+        // Geolocation.watchPosition((success)=> console.log(success));
+    }    
+   
+
+    const buttonHandler = () => {
+        axios.get(`http://api.weatherapi.com/v1/search.json?key=6db1beadfe5c4df3b1861303220306&q=${searchQuery}`)
         .then(res => {
             setData(res.data);
             setCheck(true)
         }).catch(error =>{
             console.warn("error :", error)
         })
-    }, [text])
-    
-
-
-    const buttonHandler = () => {
-        setText(searchQuery)
         setHideList(!hideList)
     }
 
@@ -53,6 +72,8 @@ const HomeScreen = () => {
         setSearchQuery('')      
     }
 
+    console.log("data",newData?.forecast?.forecastday[1]?.hour?.filter((item)=> moment(item.time).format("H") >= moment().format("H")))
+    
   return (
     <View style={{flex: 1}}>
         {check ? <ImageBackground source={{uri: "https://images.pexels.com/photos/1118873/pexels-photo-1118873.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500"}} resizeMode="cover" style={styles.image}>
@@ -75,7 +96,7 @@ const HomeScreen = () => {
         </View>
       <View style={styles.topContainer}>
           <View style={{flex: 1, padding: 10}}>
-              {hideList ? data.map(item=> <TouchableOpacity style={styles.listStyle} onPress={()=>cityHandler(item)}><Text  style={styles.textList}>{item.name}</Text></TouchableOpacity>) : null}
+              {hideList ? data.map(item=> <TouchableOpacity key={item.name} style={styles.listStyle} onPress={()=>cityHandler(item)}><Text  style={styles.textList}>{item.name}</Text></TouchableOpacity>) : null}
            <Text style={styles.topText}>{newData?.location?.name}</Text>
             <View style={styles.textImageContainer}>
             <Text style={[styles.topText, {fontSize: 40}]}>{newData?.current?.feelslike_c}°</Text>
@@ -130,13 +151,13 @@ const HomeScreen = () => {
         <ScrollView 
             horizontal={true} 
             style={styles.todayScroll}>
-            {arr?.map((item)=> <HourView temp={item}/>)} 
+            {arr?.map((item,index)=> <HourView key={index} temp={item}/>)}
         </ScrollView>
         </View>
         <View style={[styles.todayContainer, {flex: 1}]}>
            <Text style={styles.dayText}>DAILY FORECAST</Text>
         <ScrollView>
-            {newData?.forecast?.forecastday?.map((item,index)=> (index > 0 && <SingleDayView data={item}/>))}
+            {newData?.forecast?.forecastday?.map((item,index)=> (index > 0 && <SingleDayView key={index} data={item}/>))}
         </ScrollView>
         </View>
         </View>
@@ -213,7 +234,7 @@ const styles = StyleSheet.create({
     todayContainer: {
         backgroundColor: "rgba(200,200,200,0.4)",
         paddingHorizontal: 8,
-        marginHorizontal: 9,
+        marginHorizontal: 6,
         marginVertical: 15,
         paddingVertical: 8,
         borderRadius: 10 
