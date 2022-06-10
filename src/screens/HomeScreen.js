@@ -72,7 +72,7 @@ const HomeScreen = () => {
         setSearchQuery('')      
     }
 
-    console.log("data",newData?.forecast?.forecastday[1]?.hour?.filter((item)=> moment(item.time).format("H") >= moment().format("H")))
+    // console.log("data",newData?.forecast?.forecastday[1]?.hour?.filter((item)=> moment(item.time).format("H") >= moment().format("H")))
     
   return (
     <View style={{flex: 1}}>
